@@ -2,11 +2,11 @@ import 'react-native';
 import App from '../App';
 
 import {render, screen} from '@testing-library/react-native';
-
+jest.mock('../src/api/WeatherService');
 it('should render the App', () => {
   render(<App />);
 
   expect(
-    screen.getByText('Open up App.tsx to start working on your app!'),
+    screen.getByText('Search'),
   ).toBeTruthy();
 });

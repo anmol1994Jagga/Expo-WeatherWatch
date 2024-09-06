@@ -6,7 +6,7 @@ type WeatherImage = Record<
   }
 >;
 
-type WeatherCode =
+export type WeatherCode =
   | '0'
   | '1'
   | '2'
@@ -328,8 +328,64 @@ const items: Record<WeatherCode, WeatherImage> = {
  * @param weatherCode The WMO weather code
  * @returns A "day" image representation of the WMO weather code
  */
-function getWeatherImage(weatherCode: WeatherCode) {
+function getWeatherImage(weatherCode: string) {
+  const weatherImage = items[weatherCode as WeatherCode]?.day.image;
+
+  // Return the image URL or a default placeholder if the code is not found
+  return weatherImage || 'https://openweathermap.org/img/wn/01d@2x.png'; // Placeholder image for unknown codes
   // Write implementation for this function to return the "day" image for a given weather code.
 }
+export const findNearestTime = (times:string[], targetTime:string) => {
+  // Convert the target time string to a Date object
+  const targetDate: any = new Date(targetTime);
+
+  // Initialize variables to keep track of the nearest time and the smallest difference
+  let nearestTime = times[0];
+  let nearestDate: any = new Date(nearestTime);
+  let smallestDifference = Math.abs(nearestDate - targetDate);
+  let index = 0;
+  // Iterate through each time in the array
+  for (let i = 1; i < times.length; i++) {
+    const currentTime = times[i];
+    const currentDate :any = new Date(currentTime);
+
+    // Calculate the absolute difference between the current time and the target time
+    const difference = Math.abs(currentDate - targetDate);
+
+    // Update the nearest time if the current difference is smaller
+    if (difference < smallestDifference) {
+      nearestTime = currentTime;
+      smallestDifference = difference;
+      index = i;
+    }
+  }
+
+  return index;
+};
+const getAverage = (array:number[]) =>{
+  return array.reduce((sum, currentValue) => sum + currentValue, 0) / array.length;
+}  
+// Function to parse and group times by their respective dates
+export const groupTimesByDate = (times:any[],temperatures:any[],currentTime:any) => {
+  // Create an object to store grouped dates and times
+  const groupedByDate:any = {};
+  const [currentDate]= currentTime.split('T');
+  times.forEach((time,index) => {
+    const [date] = time.split('T');
+    if (!groupedByDate[date]) {
+      groupedByDate[date] = [];
+    }
+    groupedByDate[date].push(temperatures[index]);
+  });
+  const groupedByDateArr:any[] = Object.keys(groupedByDate).map((key) => {
+    return {
+      time: key,
+      temp: getAverage(groupedByDate[key])
+    }
+  })
+  const averageCurrentTemp = getAverage(groupedByDate[currentDate]); 
+  return {averageCurrentTemp, groupedByDateArr};
+};
+
 
 export default getWeatherImage;
